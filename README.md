@@ -79,5 +79,3 @@ Synthesis is a full-stack web app tool to **store, summarize, and search article
 ## License
 
 MIT
-
----
