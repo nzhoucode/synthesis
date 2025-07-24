@@ -1,0 +1,57 @@
+services:
+  backend:
+    build:
+      context: ./backend
+    ports:
+      - "8000:8000"
+    environment:
+      - OLLAMA_BASE_URL=http://ollama:11434
+      - POSTGRES_URL=postgresql://user:password@postgres:5432/mydatabase
+      - POSTGRES_VEC_URL=postgresql+psycopg://user:password@postgres:5432/mydatabase
+    depends_on:
+      - postgres
+      - ollama
+    volumes:
+      - ./backend:/backend
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./frontend:/frontend
+    restart: unless-stopped
+
+  postgres:
+    build:
+      context: .
+      dockerfile: Dockerfile.pgvector
+    container_name: pgvector17
+    environment:
+      POSTGRES_DB: mydatabase
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    restart: unless-stopped
+
+  ollama:
+    image: ollama/ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama:/root/.ollama
+      - ./llama3.sh:/llama3.sh
+    pull_policy: always
+    tty: true
+    entrypoint: ["/usr/bin/bash", "/llama3.sh"]
+    restart: unless-stopped
+
+volumes:
+  pgdata:
+  ollama:
+
